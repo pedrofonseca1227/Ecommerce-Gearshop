@@ -1,60 +1,86 @@
 <template>
-    <div class="home-page">
-  
-      <!-- Banner -->
-        <div class="banner-container">
-            <img src="@/assets/img/banner1.jpg" alt="Banner" class="banner-image" />
+  <div class="home-page">
+    <!-- Banner -->
+    <section class="galeria-carrossel">
+      <div class="carrossel">
+        <div class="carrossel-track" :style="{ transform: `translateX(-${indiceAtual * 100}%)` }">
+          <img v-for="(img, index) in banners" :key="index" :src="img" alt="Imagem da galeria" />
         </div>
-      
-        <!-- Boas-vindas -->
-        <section class="welcome-section">
-            <div class="home-banner">
-                <img src="@/assets/img/Logo.png" alt="Logo GearShop" class="home-logo" />
+      </div>
+    </section>
+      <!-- Boas-vindas -->
+    <section class="welcome-section">
+        <div class="home-banner">
+            <img src="@/assets/img/Logo.png" alt="Logo GearShop" class="home-logo" />
+        </div>
+        <h1>Bem-vindo à GearShop</h1>
+        <h3>Acelerando sonhos sobre quatro rodas</h3>
+    </section>
+    <!-- Faixa de destaques -->
+    <section class="info-strip">
+        <div class="info-box">
+            <i class="bi bi-geo-alt-fill icon"></i>
+            <p><strong>Encontre uma peça que pode estar do lado da sua casa</strong></p>
+        </div>
+        <div class="info-box">
+            <i class="bi bi-tools icon"></i>
+            <p><strong>Ache aquela peça que você precisa para seu carro e acabe com a dor de cabeça</strong></p>
+        </div>
+        <div class="info-box">
+            <i class="bi bi-credit-card-2-front-fill icon"></i>
+            <p><strong>Temos várias formas de pagamento pra você</strong></p>
+        </div>
+    </section>
+    <section class="destaques">
+        <h2>Principais Peças Vendidas</h2>
+        <div class="cards-container">
+            <div class="card">
+                <img src="#" alt="Peça 1" />
+                <h3>Amortecedor Dianteiro</h3>
+                <p>Volkswagen Gol 2010</p>
+                <span class="preco">R$ 150,00</span>
             </div>
-            <h1>Bem-vindo à GearShop</h1>
-            <h3>Acelerando sonhos sobre quatro rodas</h3>
-        </section>
-      
-        <!-- Faixa de destaques -->
-        <section class="info-strip">
-            <div class="info-box">
-                <i class="bi bi-geo-alt-fill icon"></i>
-                <p><strong>Encontre uma peça que pode estar do lado da sua casa</strong></p>
+            <div class="card">
+                <img src="#" alt="Peça 2" />
+                <h3>Farol Esquerdo</h3>
+                <p>Fiat Palio 2015</p>
+              <span class="preco">R$ 230,00</span>
             </div>
-            <div class="info-box">
-                <i class="bi bi-tools icon"></i>
-                <p><strong>Ache aquela peça que você precisa para seu carro e acabe com a dor de cabeça</strong></p>
+            <div class="card">
+                <img src="#" alt="Peça 3" />
+                <h3>Roda de Liga Leve</h3>
+                <p>Chevrolet Onix</p>
+                <span class="preco">R$ 320,00</span>
             </div>
-            <div class="info-box">
-                <i class="bi bi-credit-card-2-front-fill icon"></i>
-                <p><strong>Temos várias formas de pagamento pra você</strong></p>
-            </div>
-        </section>
-        <section class="destaques">
-            <h2>Principais Peças Vendidas</h2>
-            <div class="cards-container">
-                <div class="card">
-                    <img src="#" alt="Peça 1" />
-                    <h3>Amortecedor Dianteiro</h3>
-                    <p>Volkswagen Gol 2010</p>
-                    <span class="preco">R$ 150,00</span>
-                </div>
-                <div class="card">
-                    <img src="#" alt="Peça 2" />
-                    <h3>Farol Esquerdo</h3>
-                    <p>Fiat Palio 2015</p>
-                  <span class="preco">R$ 230,00</span>
-                </div>
-                <div class="card">
-                    <img src="#" alt="Peça 3" />
-                    <h3>Roda de Liga Leve</h3>
-                    <p>Chevrolet Onix</p>
-                    <span class="preco">R$ 320,00</span>
-                </div>
-            </div>
-        </section>
-    </div>
-  </template>
+        </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+  import { ref, onMounted, onUnmounted } from 'vue';
+  import banner2 from '@/assets/img/banner2.jpg';
+  import banner3 from '@/assets/img/banner3.jpg'; 
+  import banner4 from '@/assets/img/banner4.jpg';
+  import banner5 from '@/assets/img/banner5.jpg';
+
+
+  const banners = [banner2, banner3, banner4, banner5];
+
+  const indiceAtual = ref(0);
+  let intervalo = null;
+
+  onMounted(() => {
+    intervalo = setInterval(() => {
+      indiceAtual.value = (indiceAtual.value + 1) % banners.length;
+    }, 3000); // troca a cada 3 segundos
+  });
+
+  onUnmounted(() => {
+    clearInterval(intervalo);
+  });
+</script>
+
   
   <style scoped>
   .home-page {
@@ -63,19 +89,37 @@
     color: #1a1a1a;
     padding-top: 10px; /* Evita que o conteúdo fique atrás da navbar */
   }
-  
-  /* Banner */
-  .banner-container {
-    width: 100%;
-    overflow: hidden;
-  }
-  
-  .banner-image {
-    width: 100%;
-    max-height: 1150px;
-    object-fit: cover;
-    border-bottom: 4px solid orange;
-  }
+
+  /* Carroussel */
+
+.galeria-carrossel {
+  width: 100vw;
+  margin-top: 40px;
+  padding: 0;
+  background-color: #000;
+  overflow: hidden;
+}
+
+.carrossel {
+  width: 100%;
+  overflow: hidden;
+  height: 300px; /* você pode ajustar a altura */
+  position: relative;
+}
+
+.carrossel-track {
+  display: flex;
+  transition: transform 1s ease-in-out;
+  width: 100%;
+}
+
+.carrossel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  flex-shrink: 0;
+}
   
   /* Boas-vindas */
   .home-logo {
@@ -91,13 +135,13 @@
   .welcome-section {
     text-align: center;
     padding: 30px 20px;
-    background-color: #ffffff;
+    background-color: #000000;
   }
   
   .welcome-section h1 {
     font-size: 2.5rem;
     margin-bottom: 10px;
-    color: #1a1a1a;
+    color: #fff;
   }
   
   .welcome-section h3 {

@@ -24,9 +24,12 @@
           </form>
         </div>
         <ul class="auth-links">
-          <li><router-link to="/login">Entre</router-link></li>
-          <li><router-link to="/cadastro">Cadastre-se</router-link></li>
-          <li><button class="cep-btn" @click="abrirCepModal">Digitar CEP</button></li>
+          <li><button class="cep-btn" @click="abrirCepModal">Localizar CEP</button></li>
+          <li class="separator">|</li>
+          <li class="auth-actions">
+            <router-link to="/login">Entrar</router-link>
+            <router-link to="/cadastro">Cadastre-se</router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -47,6 +50,7 @@
 <script setup>
     import { useRouter } from 'vue-router';
     import { onMounted, onUnmounted, ref } from 'vue';
+    import { supabase } from '@/supabase.js'; 
   
     // Menu celular
     const menuOpen = ref(false);
@@ -66,27 +70,28 @@
     };
 
     // Esconde a navbar se rolar pra baixo
-  const isHidden = ref(false);
-  let lastScrollY = 0;
+    const isHidden = ref(false);
+    let lastScrollY = 0;
   
-  const handleScroll = () => {
+    const handleScroll = () => {
     const currentScrollY = window.scrollY;
-    isHidden.value = currentScrollY > lastScrollY && currentScrollY > 100; 
-    lastScrollY = currentScrollY;
-  };
+      isHidden.value = currentScrollY > lastScrollY && currentScrollY > 100; 
+      lastScrollY = currentScrollY;
+    };
   
-  onMounted(() => {
-    window.addEventListener('scroll', handleScroll);
-  });
+    onMounted(() => {
+      window.addEventListener('scroll', handleScroll);
+    });
+    
+    onUnmounted(() => {
+      window.removeEventListener('scroll', handleScroll);
+    });
   
-  onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
-  });
+    // CEP Modal
+      const showCepModal = ref(false);
+      const abrirCepModal = () => showCepModal.value = true;
+      const fecharCepModal = () => showCepModal.value = false;
 
-  // CEP Modal
-    const showCepModal = ref(false);
-    const abrirCepModal = () => showCepModal.value = true;
-    const fecharCepModal = () => showCepModal.value = false;
 </script>
   
 <style scoped>
@@ -122,6 +127,8 @@
   gap: 30px;
   margin: 0;
   padding: 0;
+  margin-left: auto;
+  margin-right: 100px;
   align-items: center;
 }
 
@@ -145,6 +152,28 @@
 .nav-links li a:hover,
 .auth-links li a:hover {
   color: #ff6600;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-actions a {
+  padding-right: 0;
+}
+
+.auth-links .separator {
+  color: #ff6600;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 10px;
+  user-select: none;
+}
+
+.navbar-hidden {
+  transform: translateY(-100%);
+  transition: transform 0.5s ease-in-out;
 }
 
 /* CEP Modal */
