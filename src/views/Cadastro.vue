@@ -15,7 +15,7 @@
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import { supabase } from '@/supabase.js'; // Ajuste se necessário
+  import { supabase } from '@/supabase.js'; 
   
   const email = ref('');
   const password = ref('');
@@ -32,7 +32,7 @@
       alert('Erro ao cadastrar: ' + error.message);
     } else {
       console.log('Usuário cadastrado:', data);
-      alert('Cadastro realizado com sucesso!');
+      alert('Cadastro realizado com sucesso, confirme no seu email para validação do login!');
       router.push('/login');
     }
   };

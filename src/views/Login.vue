@@ -16,7 +16,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { supabase } from '@/supabase.js'; // Corrigido
+import { supabase } from '@/supabase.js'; 
 
 const email = ref('');
 const password = ref('');
@@ -30,7 +30,7 @@ const login = async () => {
 
   if (error) {
     console.error('Erro ao fazer login:', error.message);
-    alert('Erro ao fazer login!');
+    alert('Erro ao fazer login!' + error.message);
   } else {
     console.log('Usuário logado:', data);
     alert('Login realizado com sucesso!');

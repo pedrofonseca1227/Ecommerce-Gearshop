@@ -1,50 +1,59 @@
 <template>
-    <nav class="navbar" :class="{ 'navbar-hidden': isHidden }">
-      <div class="navbar-container">
-        <button class="hamburger" @click="toggleMenu">
-             <span :class="{ open: menuOpen }"></span>
-            <span :class="{ open: menuOpen }"></span>
-            <span :class="{ open: menuOpen }"></span>
-        </button>
-        <ul class="nav-links">
-          <li><router-link to="/">Home</router-link></li>
-          <li><router-link to="/categoria">Categorias</router-link></li>
-          <li><router-link to="/anunciar">Anunciar</router-link></li>
-          <li><router-link to="/sobre">Sobre Nós</router-link></li>
-          <li><router-link to="/contato">Contato</router-link></li>
-        </ul>
-        <div class="search-container">
-          <form class="search-bar" @submit.prevent="handleSearch">
-            <input
-              type="text"
-              v-model="searchQuery"
-              placeholder="Buscar peças..."
-            />
-            <button type="submit">Buscar</button>
-          </form>
-        </div>
-        <ul class="auth-links">
-          <li><button class="cep-btn" @click="abrirCepModal">Localizar CEP</button></li>
-          <li class="separator">|</li>
-          <li class="auth-actions">
-            <router-link to="/login">Entrar</router-link>
-            <router-link to="/cadastro">Cadastre-se</router-link>
-          </li>
-        </ul>
+  <nav class="navbar" :class="{ 'navbar-hidden': isHidden }">
+    <div class="navbar-container">
+      <button class="hamburger" @click="toggleMenu">
+        <span :class="{ open: menuOpen }"></span>
+        <span :class="{ open: menuOpen }"></span>
+        <span :class="{ open: menuOpen }"></span>
+      </button>
+      
+      <ul class="nav-links">
+        <li><router-link to="/">Home</router-link></li>
+        <li><router-link to="/categoria">Categorias</router-link></li>
+        <li><router-link to="/anunciar">Anunciar</router-link></li>
+        <li><router-link to="/sobre">Sobre Nós</router-link></li>
+        <li><router-link to="/contato">Contato</router-link></li>
+      </ul>
+      
+      <div class="search-container">
+        <form class="search-bar" @submit.prevent="handleSearch">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Buscar peças..."
+          />
+          <button type="submit">Buscar</button>
+        </form>
       </div>
-    </nav>
-    <teleport to="body">
-      <div v-if="showCepModal" class="modal-overlay" @click.self="fecharCepModal">
-        <div class="modal">
-          <h2>Informe seu CEP</h2>
-          <input type="text" placeholder="Ex: 01001-000" maxlength="9" />
-          <div class="modal-actions">
-            <button @click="fecharCepModal">Cancelar</button>
-            <button>Aplicar</button>
-          </div>
+
+      <ul class="auth-links">
+        <li><button class="cep-btn" @click="abrirCepModal">Localizar CEP</button></li>
+        <li class="separator">|</li>
+
+        <!-- Exibe o usuário logado ou links de login -->
+        <li v-if="user">
+          <span>Bem-vindo, {{ user.email }}</span>
+        </li>
+        <li v-else>
+          <router-link to="/login">Entrar</router-link>
+          <router-link to="/cadastro">Cadastre-se</router-link>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <teleport to="body">
+    <div v-if="showCepModal" class="modal-overlay" @click.self="fecharCepModal">
+      <div class="modal">
+        <h2>Informe seu CEP</h2>
+        <input type="text" placeholder="Ex: 01001-000" maxlength="9" />
+        <div class="modal-actions">
+          <button @click="fecharCepModal">Cancelar</button>
+          <button>Aplicar</button>
         </div>
       </div>
-    </teleport>
+    </div>
+  </teleport>
 </template>
   
 <script setup>
@@ -92,6 +101,19 @@
       const abrirCepModal = () => showCepModal.value = true;
       const fecharCepModal = () => showCepModal.value = false;
 
+
+    // Verificação de login
+
+    const user = ref(null)
+    onMounted(async () => {
+      const { data } = await supabase.auth.getUser()
+      user.value = data.user 
+    })
+
+    const logout = async () => {
+      await supabase.auth.signOut()
+      window.location.reload() // ou redireciona com router.push('/login')
+    }
 </script>
   
 <style scoped>
@@ -306,4 +328,3 @@
   box-shadow: 0 0 0 2px #ff6600; /* Destaque no botão */
 }
 </style>
-  
