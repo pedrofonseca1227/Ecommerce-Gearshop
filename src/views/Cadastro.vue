@@ -2,9 +2,8 @@
     <div class="cadastro-container">
       <h2>Crie sua Conta</h2>
       <form @submit.prevent="cadastrar">
-        <input type="text" placeholder="Nome completo" v-model="nome" required />
-        <input type="email" placeholder="E-mail" v-model="email" required />
-        <input type="password" placeholder="Senha" v-model="senha" required />
+        <input v-model="email" type="email" placeholder="Email" required />
+        <input v-model="password" type="password" placeholder="Senha" required />
         <button type="submit">Cadastrar</button>
         <p class="link">
           Já tem uma conta? <router-link to="/login">Entre aqui</router-link>
@@ -13,18 +12,32 @@
     </div>
   </template>
   
-  <script setup>
+<script setup>
   import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { supabase } from '@/supabase.js'; 
   
-  const nome = ref('');
   const email = ref('');
-  const senha = ref('');
+  const password = ref('');
+  const router = useRouter();
   
-  const cadastrar = () => {
-    console.log('Cadastro:', { nome: nome.value, email: email.value, senha: senha.value });
-    // Lógica futura para cadastro
+  const cadastrar = async () => {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.value,
+      password: password.value,
+    });
+  
+    if (error) {
+      console.error('Erro ao cadastrar:', error.message);
+      alert('Erro ao cadastrar: ' + error.message);
+    } else {
+      console.log('Usuário cadastrado:', data);
+      alert('Cadastro realizado com sucesso, confirme no seu email para validação do login!');
+      router.push('/login');
+    }
   };
-  </script>
+</script>
+  
   
   <style scoped>
   .cadastro-container {
