@@ -1,43 +1,45 @@
 <template>
-    <div class="cadastro-container">
-      <h2>Crie sua Conta</h2>
-      <form @submit.prevent="cadastrar">
-        <input v-model="email" type="email" placeholder="Email" required />
-        <input v-model="password" type="password" placeholder="Senha" required />
-        <button type="submit">Cadastrar</button>
-        <p class="link">
-          Já tem uma conta? <router-link to="/login">Entre aqui</router-link>
-        </p>
-      </form>
-    </div>
-  </template>
-  
+  <div class="cadastro-container">
+    <h2>Crie sua Conta</h2>
+    <form @submit.prevent="cadastrar">
+      <input v-model="email" type="email" placeholder="Email" required />
+      <input v-model="password" type="password" placeholder="Senha" required />
+      <button type="submit">Cadastrar</button>
+      <p class="link">
+        Já tem uma conta? <router-link to="/login">Entre aqui</router-link>
+      </p>
+    </form>
+  </div>
+</template>
+
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import { supabase } from '@/supabase.js'; 
+  import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
   
   const email = ref('');
   const password = ref('');
   const router = useRouter();
   
   const cadastrar = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value,
-    });
+    const auth = getAuth();
   
-    if (error) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    
+      // Envia email de verificação
+      await sendEmailVerification(userCredential.user);
+    
+      console.log('Usuário cadastrado:', userCredential.user);
+      alert('Cadastro realizado com sucesso! Verifique seu e-mail antes de fazer login.');
+      router.push('/login');
+    } catch (error) {
       console.error('Erro ao cadastrar:', error.message);
       alert('Erro ao cadastrar: ' + error.message);
-    } else {
-      console.log('Usuário cadastrado:', data);
-      alert('Cadastro realizado com sucesso, confirme no seu email para validação do login!');
-      router.push('/login');
     }
   };
 </script>
-  
+
   
   <style scoped>
   .cadastro-container {

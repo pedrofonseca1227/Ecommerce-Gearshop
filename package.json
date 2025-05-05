@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
+    "firebase": "^11.6.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
@@ -17,5 +18,18 @@
     "@vitejs/plugin-vue": "^5.2.3",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2"
-  }
+  },
+  "description": "This template should help get you started developing with Vue 3 in Vite.",
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedrofonseca1227/Ecommerce-Gearshop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pedrofonseca1227/Ecommerce-Gearshop/issues"
+  },
+  "homepage": "https://github.com/pedrofonseca1227/Ecommerce-Gearshop#readme"
 }

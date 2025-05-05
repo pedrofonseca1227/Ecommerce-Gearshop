@@ -1,182 +1,129 @@
 <template>
-    <div class="categorias">
-      <h1>Categorias de Peças</h1>
-  
-      <!-- Barra de Pesquisa -->
-      <div class="search-filter">
-        <div class="search-bar">
-          <i class="fas fa-search"></i>
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            placeholder="Buscar peça..." 
-          />
-        </div>
-  
-        <!-- Filtro de Categorias -->
-        <select v-model="selectedCategory" class="category-select">
-          <option value="">Todas as Categorias</option>
-          <option value="motor">Motor</option>
-          <option value="suspensao">Suspensão</option>
-          <option value="freios">Freios</option>
-          <option value="eletrica">Elétrica</option>
-          <option value="carroceria">Carroceria</option>
-          <option value="rodas">Rodas e Pneus</option>
-        </select>
-      </div>
-  
-      <!-- Lista de Cards -->
-      <div class="cards-container">
-        <div 
-          v-for="(item, index) in filteredItems" 
-          :key="index" 
-          class="card"
-        >
-          <img :src="item.image" alt="Imagem da peça" class="card-image"/>
-          <div class="card-info">
-            <h3>{{ item.name }}</h3>
-            <p>{{ item.description }}</p>
-            <span class="price">R$ {{ item.price }}</span>
-          </div>
-        </div>
+  <div class="categorias-container">
+    <h1>🔍 Produtos à Venda</h1>
+    <div class="filtros">
+      <select v-model="filtroCategoria">
+        <option value="">Todas as Categorias</option>
+        <option>Motor</option>
+        <option>Suspensão</option>
+        <option>Cambio</option>
+        <option>Freios</option>
+        <option>Elétrica</option>
+        <option>Carroceria</option>
+        <option>Rodas e Pneus</option>
+      </select>
+    </div>
+
+    <div class="produtos">
+      <div v-for="produto in produtosFiltrados" :key="produto.id" class="produto-card">
+        <img :src="produto.imagem_url" alt="Imagem do produto" class="produto-imagem" />
+        <h3>{{ produto.nome }}</h3>
+        <p>{{ produto.categoria }}</p>
+        <p>R$ {{ produto.preco }}</p>
+        <p>{{ produto.estado }}</p>
+        <p>{{ produto.descricao }}</p>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed } from 'vue';
-  
-  const items = [
-    { name: "Motor V8", description: "Potente para alta performance", price: 1000, category: "motor", image: "/assets/img/peça1.jpg" },
-    { name: "Suspensão Esportiva", description: "Ideal para pista", price: 500, category: "suspensao", image: "/assets/img/peça2.jpg" },
-    { name: "Pastilhas de Freio", description: "Segurança nas curvas", price: 200, category: "freios", image: "/assets/img/peça3.jpg" },
-    { name: "Faróis LED", description: "Melhore a visibilidade", price: 150, category: "eletrica", image: "/assets/img/peça4.jpg" },
-    { name: "Parachoque Traseiro", description: "Design agressivo", price: 800, category: "carroceria", image: "/assets/img/peça5.jpg" },
-    { name: "Pneu Michelin", description: "Alta durabilidade", price: 350, category: "rodas", image: "/assets/img/peça6.jpg" }
-  ];
-  
-  const searchQuery = ref('');
-  const selectedCategory = ref('');
-  
-  const filteredItems = computed(() => {
-    return items.filter(item => {
-      const matchSearch = item.name.toLowerCase().includes(searchQuery.value.toLowerCase());
-      const matchCategory = selectedCategory.value ? item.category === selectedCategory.value : true;
-      return matchSearch && matchCategory;
-    });
-  });
-  </script>
-  
-  <style scoped>
-  .categorias {
-    padding: 50px 20px;
-    background-color: #f4f4f4;
-    color: white;
-    text-align: center;
-    font-family: 'Rajdhani', sans-serif;
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import { supabase } from '@/supabase.js';
+
+const filtroCategoria = ref('');
+const produtos = ref([]);
+
+const produtosFiltrados = computed(() => {
+  if (filtroCategoria.value) {
+    return produtos.value.filter(produto => produto.categoria === filtroCategoria.value);
   }
-  
-  h1 {
-    font-size: 36px;
-    color: #ff6600;
-    margin-bottom: 30px;
+  return produtos.value;
+});
+
+onMounted(async () => {
+  const { data, error } = await supabase.from('produtos').select('*');
+
+  if (error) {
+    console.error('Erro ao carregar produtos:', error.message);
+  } else {
+    produtos.value = data;
   }
-  
-  /* Search and Filter */
-  .search-filter {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
+});
+</script>
+
+<style scoped>
+.categorias-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Rajdhani', sans-serif;
+  padding-top: 80px; 
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+.filtros {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.filtros select {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.produtos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.produto-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.produto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.produto-imagem {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-top: 10px;
+}
+
+p {
+  margin: 5px 0;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .produtos {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .search-bar {
-    background: #f4f4f4;
-    border: 1px solid #333;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    border-radius: 8px;
-    width: 300px;
+}
+
+@media (max-width: 480px) {
+  .produtos {
+    grid-template-columns: 1fr;
   }
-  
-  .search-bar i {
-    color: #888;
-    margin-right: 10px;
-  }
-  
-  .search-bar input {
-    border: none;
-    background: transparent;
-    color: #333;
-    width: 100%;
-    font-size: 16px;
-    outline: none;
-  }
-  
-  .category-select {
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #f4f4f4;
-    border: 1px solid #333;
-    color: #333;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .category-select option {
-    background-color: #1e1e1e;
-    color: white;
-  }
-  
-  /* Cards */
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 0 20px;
-  }
-  
-  .card {
-    background-color: #1e1e1e;
-    border: 2px solid #ff6600;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 10px rgba(255, 102, 0, 0.2);
-  }
-  
-  .card:hover {
-    transform: scale(1.03);
-  }
-  
-  .card-image {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-  }
-  
-  .card-info {
-    padding: 15px;
-    color: white;
-  }
-  
-  .card-info h3 {
-    margin: 0 0 10px;
-    font-size: 20px;
-    color: #ff6600;
-  }
-  
-  .card-info p {
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-  
-  .price {
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-  }
-  </style>
-  
+}
+</style>

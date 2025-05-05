@@ -14,30 +14,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { supabase } from '@/supabase.js'; 
-
-const email = ref('');
-const password = ref('');
-const router = useRouter();
-
-const login = async () => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value,
-  });
-
-  if (error) {
-    console.error('Erro ao fazer login:', error.message);
-    alert('Erro ao fazer login!' + error.message);
-  } else {
-    console.log('Usuário logado:', data);
-    alert('Login realizado com sucesso!');
-    router.push('/'); // Redireciona para a home
-  }
-};
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+  
+  const email = ref('');
+  const password = ref('');
+  const router = useRouter();
+  
+  const login = async () => {
+    const auth = getAuth();
+  
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+      console.log('Usuário logado:', userCredential.user);
+      alert('Login realizado com sucesso!');
+      router.push('/');
+    } catch (error) {
+      console.error('Erro ao fazer login:', error.message);
+      alert('Erro ao fazer login: ' + error.message);
+    }
+  };
 </script>
+
 
 <style scoped>
 .login-container {
