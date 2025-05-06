@@ -16,10 +16,10 @@
       </ul>
       
       <div class="search-container">
-        <form class="search-bar" @submit.prevent="handleSearch">
+        <form class="search-bar" @submit.prevent="pesquisar">
           <input
             type="text"
-            v-model="searchQuery"
+            v-model="termoBusca"
             placeholder="Buscar peças..."
           />
           <button type="submit">Buscar</button>
@@ -30,10 +30,14 @@
         <li><button class="cep-btn" @click="abrirCepModal">Localizar CEP</button></li>
         <li class="separator">|</li>
 
-        <!-- Exibe o usuário logado ou links de login -->
+        <!-- Se o usuário estiver logado -->
         <li v-if="user">
-          <span>Bem-vindo, {{ user.email }}</span>
+          <router-link to="/perfil">
+            <i class="fa fa-user-circle account-icon"></i> <!-- Ícone de conta -->
+          </router-link>
+          <button @click="logout" class="logout-btn">Sair</button> <!-- Botão de logout -->
         </li>
+
         <li v-else>
           <router-link to="/login">Entrar</router-link>
           <router-link to="/cadastro">Cadastre-se</router-link>
@@ -41,79 +45,45 @@
       </ul>
     </div>
   </nav>
-
-  <teleport to="body">
-    <div v-if="showCepModal" class="modal-overlay" @click.self="fecharCepModal">
-      <div class="modal">
-        <h2>Informe seu CEP</h2>
-        <input type="text" placeholder="Ex: 01001-000" maxlength="9" />
-        <div class="modal-actions">
-          <button @click="fecharCepModal">Cancelar</button>
-          <button>Aplicar</button>
-        </div>
-      </div>
-    </div>
-  </teleport>
 </template>
-  
+
 <script setup>
-    import { useRouter } from 'vue-router';
-    import { onMounted, onUnmounted, ref } from 'vue';
-    import { supabase } from '@/supabase.js'; 
-  
-    // Menu celular
-    const menuOpen = ref(false);
-    const toggleMenu = () => {
-      menuOpen.value = !menuOpen.value;
-    };
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router';
+import { auth } from '@/firebase'  // Certifique-se de que a importação do Firebase está correta
+import { db } from '@/firebase'
+import { collection, getDocs } from 'firebase/firestore'
 
-    // Barra de pesquisa
-    const termoBusca = ref('');
-    const router = useRouter();
+// Variáveis reativas
+const user = ref(null); // Agora é 'null' inicialmente
+const termoBusca = ref('');
 
-    const pesquisar = () => {
-      if (termoBusca.value.trim()) {
-        router.push({ name: 'categorias', query: { busca: termoBusca.value } });
-        termoBusca.value = '';
-      }
-    };
+// Função para escutar alterações no estado de autenticação
+const unsubscribe = auth.onAuthStateChanged((loggedUser) => {
+  user.value = loggedUser;  // Atualiza o usuário quando houver login/logout
+});
 
-    // Esconde a navbar se rolar pra baixo
-    const isHidden = ref(false);
-    let lastScrollY = 0;
-  
-    const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-      isHidden.value = currentScrollY > lastScrollY && currentScrollY > 100; 
-      lastScrollY = currentScrollY;
-    };
-  
-    onMounted(() => {
-      window.addEventListener('scroll', handleScroll);
-    });
-    
-    onUnmounted(() => {
-      window.removeEventListener('scroll', handleScroll);
-    });
-  
-    // CEP Modal
-      const showCepModal = ref(false);
-      const abrirCepModal = () => showCepModal.value = true;
-      const fecharCepModal = () => showCepModal.value = false;
+onUnmounted(() => {
+  unsubscribe();  // Limpa o listener quando o componente for desmontado
+});
 
+const router = useRouter(); 
+const pesquisar = () => {
+  if (termoBusca.value.trim()) {
+    router.push({ name: 'categoria', query: { busca: termoBusca.value.trim() } });
+    termoBusca.value = '';  // Limpa o campo após a pesquisa
+  }
+};
 
-    // Verificação de login
-
-    const user = ref(null)
-    onMounted(async () => {
-      const { data } = await supabase.auth.getUser()
-      user.value = data.user 
-    })
-
-    const logout = async () => {
-      await supabase.auth.signOut()
-      window.location.reload() // ou redireciona com router.push('/login')
-    }
+// Função de logout
+const logout = async () => {
+  try {
+    await auth.signOut(); // Realiza o logout
+    user.value = null;     // Atualiza o estado do usuário
+  } catch (error) {
+    console.error('Erro ao sair:', error);
+  }
+};
 </script>
   
 <style scoped>
@@ -174,6 +144,24 @@
 .nav-links li a:hover,
 .auth-links li a:hover {
   color: #ff6600;
+}
+
+.account-icon {
+  font-size: 24px; /* Ajuste o tamanho conforme necessário */
+  color: white;    /* Garante que o ícone seja branco */
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding-left: 10px;
+}
+
+.logout-btn:hover {
+  text-decoration: underline;
 }
 
 .auth-actions {

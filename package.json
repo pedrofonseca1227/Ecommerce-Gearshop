@@ -9,10 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.4",
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "emailjs-com": "^3.2.0",
+    "express": "^5.1.0",
     "firebase": "^11.6.1",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

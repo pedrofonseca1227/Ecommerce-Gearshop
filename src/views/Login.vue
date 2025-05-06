@@ -14,29 +14,33 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-  
-  const email = ref('');
-  const password = ref('');
-  const router = useRouter();
-  
-  const login = async () => {
-    const auth = getAuth();
-  
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
-      console.log('Usuário logado:', userCredential.user);
-      alert('Login realizado com sucesso!');
-      router.push('/');
-    } catch (error) {
-      console.error('Erro ao fazer login:', error.message);
-      alert('Erro ao fazer login: ' + error.message);
-    }
-  };
-</script>
+  import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { signInWithEmailAndPassword } from 'firebase/auth'
+  import { auth } from '@/firebase.js'
 
+  const email = ref('')
+  const password = ref('')
+  const router = useRouter()
+
+  const login = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value)
+      const user = userCredential.user
+
+      if (!user.emailVerified) {
+        alert('Por favor, verifique seu e-mail antes de entrar.')
+        return
+      }
+
+      console.log('Login realizado:', user)
+      router.push('/')
+    } catch (error) {
+      console.error('Erro ao fazer login:', error.message)
+      alert('Credenciais inválidas. Verifique seu e-mail e senha.')
+    }
+  }
+</script>
 
 <style scoped>
 .login-container {

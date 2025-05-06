@@ -1,19 +1,18 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDzxM7Ov6Ni7Se-glcBNBAbrG-7glLvicc",
     authDomain: "gearshop-ad49b.firebaseapp.com",
     projectId: "gearshop-ad49b",
-    storageBucket: "gearshop-ad49b.firebasestorage.app",
+    storageBucket: "gearshop-ad49b.appspot.com",
     messagingSenderId: "106857689081",
     appId: "1:106857689081:web:4858763dded798bf761728"
 };
 
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+export { db, auth, app};
