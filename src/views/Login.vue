@@ -14,29 +14,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { supabase } from '@/supabase.js'; 
+  import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { signInWithEmailAndPassword } from 'firebase/auth'
+  import { auth } from '@/firebase.js'
 
-const email = ref('');
-const password = ref('');
-const router = useRouter();
+  const email = ref('')
+  const password = ref('')
+  const router = useRouter()
 
-const login = async () => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value,
-  });
+  const login = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value)
+      const user = userCredential.user
 
-  if (error) {
-    console.error('Erro ao fazer login:', error.message);
-    alert('Erro ao fazer login!' + error.message);
-  } else {
-    console.log('Usuário logado:', data);
-    alert('Login realizado com sucesso!');
-    router.push('/'); // Redireciona para a home
+      if (!user.emailVerified) {
+        alert('Por favor, verifique seu e-mail antes de entrar.')
+        return
+      }
+
+      console.log('Login realizado:', user)
+      router.push('/')
+    } catch (error) {
+      console.error('Erro ao fazer login:', error.message)
+      alert('Credenciais inválidas. Verifique seu e-mail e senha.')
+    }
   }
-};
 </script>
 
 <style scoped>

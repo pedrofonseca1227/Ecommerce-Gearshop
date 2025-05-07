@@ -1,33 +1,40 @@
 <template>
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>GearShop</h3>
-          <p>Acelerando sonhos, conectando peças.</p>
-        </div>
-  
-        <div class="footer-section">
-          <h4>Links Rápidos</h4>
-          <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li><router-link to="/categoria">Categorias</router-link></li>
-            <li><router-link to="/contato">Contato</router-link></li>
-            <li><router-link to="/sobre">Sobre Nós</router-link></li>
-          </ul>
-        </div>
-  
-        <div class="footer-section">
-          <h4>Contato</h4>
-          <p>Email: suporte@gearshop.com</p>
-          <p>Telefone: (14) 99999-9999</p>
-        </div>
+  <div class="main-content">
+    <!-- Aqui fica o conteúdo da sua página de Categorias ou qualquer outra -->
+    <div class="categorias-container">
+      <!-- Seu conteúdo aqui -->
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>GearShop</h3>
+        <p>Acelerando sonhos, conectando peças.</p>
       </div>
   
-      <div class="footer-bottom">
-        <p>&copy; 2025 GearShop. Todos os direitos reservados.</p>
+      <div class="footer-section">
+        <h4>Links Rápidos</h4>
+        <ul>
+          <li><router-link to="/">Home</router-link></li>
+          <li><router-link to="/categoria">Categorias</router-link></li>
+          <li><router-link to="/contato">Contato</router-link></li>
+          <li><router-link to="/sobre">Sobre Nós</router-link></li>
+        </ul>
       </div>
-    </footer>
-  </template>
+  
+      <div class="footer-section">
+        <h4>Contato</h4>
+        <p>Email: suporte@gearshop.com</p>
+        <p>Telefone: (14) 99999-9999</p>
+      </div>
+    </div>
+  
+    <div class="footer-bottom">
+      <p>&copy; 2025 GearShop. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</template>
+
   
   <style scoped>
   .footer {

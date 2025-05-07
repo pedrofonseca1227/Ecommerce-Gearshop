@@ -6,27 +6,29 @@ import Sobre from '../views/Sobre.vue';
 import Login from '../views/Login.vue';
 import Cadastro from '../views/Cadastro.vue';
 import Anunciar from '../views/Anunciar.vue';
-import { supabase } from '@/supabase.js';
+import { auth } from '../firebase';
+import Carrinho from '../views/Carrinho.vue'; // Corrigido: importação correta do auth
 
 const routes = [
   { path: '/', component: Home },
-  { path: '/categoria', component: Categoria },
+  { path: '/categoria', name:'categoria', component: Categoria },
   { path: '/contato', component: Contato },
   { path: '/sobre', component: Sobre },
   { path: '/login', component: Login },
   { path: '/cadastro', component: Cadastro },
-  { path: '/anunciar', component: Anunciar, meta: { requiresAuth: true } }, // 🚧 protegida
+  { path: '/anunciar', component: Anunciar, meta: { requiresAuth: true } },
+  { path: '/carrinho',name:'Carrinho', component: () => import('@/views/Carrinho.vue') },
 ];
 
 const router = createRouter({
-  history: createWebHistory(), 
+  history: createWebHistory(),
   routes,
 });
 
 // 🔐 Guardião de rotas
 router.beforeEach(async (to, from, next) => {
-  const { data } = await supabase.auth.getSession();
-  const isAuthenticated = !!data.session;
+  const { currentUser } = auth; // Usando currentUser para verificar sessão
+  const isAuthenticated = !!currentUser;
 
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login');

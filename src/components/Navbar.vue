@@ -6,7 +6,7 @@
         <span :class="{ open: menuOpen }"></span>
         <span :class="{ open: menuOpen }"></span>
       </button>
-      
+
       <ul class="nav-links">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/categoria">Categorias</router-link></li>
@@ -14,110 +14,110 @@
         <li><router-link to="/sobre">Sobre Nós</router-link></li>
         <li><router-link to="/contato">Contato</router-link></li>
       </ul>
-      
+
       <div class="search-container">
-        <form class="search-bar" @submit.prevent="handleSearch">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Buscar peças..."
-          />
+        <form class="search-bar" @submit.prevent="pesquisar">
+          <input type="text" v-model="termoBusca" placeholder="Buscar peças..." />
           <button type="submit">Buscar</button>
         </form>
       </div>
 
       <ul class="auth-links">
-        <li><button class="cep-btn" @click="abrirCepModal">Localizar CEP</button></li>
-        <li class="separator">|</li>
+        <template v-if="user">
+          <li>
+            <router-link to="/carrinho" class="cart-link">
+              <i class="fa fa-shopping-cart cart-icon"></i>
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/#" class="account-link">
+              <i class="fa fa-user-circle account-icon"></i>
+            </router-link>
+          </li>
+          <li>
+            <button @click="logout" class="logout-btn">Sair</button>
+          </li>
+        </template>
 
-        <!-- Exibe o usuário logado ou links de login -->
-        <li v-if="user">
-          <span>Bem-vindo, {{ user.email }}</span>
-        </li>
-        <li v-else>
-          <router-link to="/login">Entrar</router-link>
-          <router-link to="/cadastro">Cadastre-se</router-link>
-        </li>
+        <template v-else>
+          <li><router-link to="/login">Entrar</router-link></li>
+          <li><router-link to="/cadastro">Cadastre-se</router-link></li>
+        </template>
       </ul>
     </div>
   </nav>
-
-  <teleport to="body">
-    <div v-if="showCepModal" class="modal-overlay" @click.self="fecharCepModal">
-      <div class="modal">
-        <h2>Informe seu CEP</h2>
-        <input type="text" placeholder="Ex: 01001-000" maxlength="9" />
-        <div class="modal-actions">
-          <button @click="fecharCepModal">Cancelar</button>
-          <button>Aplicar</button>
-        </div>
-      </div>
-    </div>
-  </teleport>
 </template>
-  
+
+
 <script setup>
-    import { useRouter } from 'vue-router';
-    import { onMounted, onUnmounted, ref } from 'vue';
-    import { supabase } from '@/supabase.js'; 
-  
-    // Menu celular
-    const menuOpen = ref(false);
-    const toggleMenu = () => {
-      menuOpen.value = !menuOpen.value;
-    };
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router';
+import { auth } from '@/firebase'  // Certifique-se de que a importação do Firebase está correta
+import { db } from '@/firebase'
+import { collection, getDocs } from 'firebase/firestore'
 
-    // Barra de pesquisa
-    const termoBusca = ref('');
-    const router = useRouter();
+// Variáveis reativas
+const user = ref(null); // Agora é 'null' inicialmente
+const termoBusca = ref('');
 
-    const pesquisar = () => {
-      if (termoBusca.value.trim()) {
-        router.push({ name: 'categorias', query: { busca: termoBusca.value } });
-        termoBusca.value = '';
-      }
-    };
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value;
+};
 
-    // Esconde a navbar se rolar pra baixo
-    const isHidden = ref(false);
-    let lastScrollY = 0;
-  
-    const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-      isHidden.value = currentScrollY > lastScrollY && currentScrollY > 100; 
-      lastScrollY = currentScrollY;
-    };
-  
-    onMounted(() => {
-      window.addEventListener('scroll', handleScroll);
-    });
-    
-    onUnmounted(() => {
-      window.removeEventListener('scroll', handleScroll);
-    });
-  
-    // CEP Modal
-      const showCepModal = ref(false);
-      const abrirCepModal = () => showCepModal.value = true;
-      const fecharCepModal = () => showCepModal.value = false;
+// Função para escutar alterações no estado de autenticação
+const unsubscribe = auth.onAuthStateChanged((loggedUser) => {
+  user.value = loggedUser;  // Atualiza o usuário quando houver login/logout
+});
 
+onUnmounted(() => {
+  unsubscribe();  // Limpa o listener quando o componente for desmontado
+});
 
-    // Verificação de login
+const router = useRouter(); 
+const pesquisar = () => {
+  if (termoBusca.value.trim()) {
+    router.push({ name: 'categoria', query: { busca: termoBusca.value.trim() } });
+    termoBusca.value = '';  // Limpa o campo após a pesquisa
+  }
+};
 
-    const user = ref(null)
-    onMounted(async () => {
-      const { data } = await supabase.auth.getUser()
-      user.value = data.user 
-    })
+// Função de logout
+const logout = async () => {
+  try {
+    await auth.signOut(); // Realiza o logout
+    user.value = null;     // Atualiza o estado do usuário
+  } catch (error) {
+    console.error('Erro ao sair:', error);
+  }
+};
 
-    const logout = async () => {
-      await supabase.auth.signOut()
-      window.location.reload() // ou redireciona com router.push('/login')
-    }
+const handleScroll = () => {
+  isHidden.value = window.scrollY > 100;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
   
 <style scoped>
-/* navbar */
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  margin: 5px auto;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.hamburger span.open {
+  background-color: #ff6600;
+}
+
 .navbar {
   background-color: #1a1a1a;
   padding: 0;
@@ -174,6 +174,24 @@
 .nav-links li a:hover,
 .auth-links li a:hover {
   color: #ff6600;
+}
+
+.account-icon {
+  font-size: 24px; /* Ajuste o tamanho conforme necessário */
+  color: white;    /* Garante que o ícone seja branco */
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding-left: 10px;
+}
+
+.logout-btn:hover {
+  text-decoration: underline;
 }
 
 .auth-actions {
@@ -312,19 +330,45 @@
 }
 
 .search-bar button:hover {
-  background-color: #e55b00; /* Cor laranja mais escuro */
+  background-color: #e55b00; 
 }
 
 .search-bar input::placeholder {
-  color: #aaa; /* Cor do placeholder */
+  color: #aaa; 
 }
 
 .search-bar:focus-within {
-  box-shadow: 0 0 0 2px #ff6600; /* Destaque quando em foco */
+  box-shadow: 0 0 0 2px #ff6600; 
 }
 
 .search-bar button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #ff6600; /* Destaque no botão */
+  box-shadow: 0 0 0 2px #ff6600; 
+}
+
+.cart-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.cart-icon {
+  font-size: 24px;
+  color: white;
+  transition: color 0.3s ease;
+}
+
+.cart-icon:hover {
+  color: #ff6600;
+}
+
+.account-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.account-icon:hover {
+  color: #ff6600;
 }
 </style>

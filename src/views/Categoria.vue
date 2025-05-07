@@ -1,182 +1,300 @@
 <template>
-    <div class="categorias">
-      <h1>Categorias de Peças</h1>
-  
-      <!-- Barra de Pesquisa -->
-      <div class="search-filter">
-        <div class="search-bar">
-          <i class="fas fa-search"></i>
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            placeholder="Buscar peça..." 
-          />
-        </div>
-  
-        <!-- Filtro de Categorias -->
-        <select v-model="selectedCategory" class="category-select">
-          <option value="">Todas as Categorias</option>
-          <option value="motor">Motor</option>
-          <option value="suspensao">Suspensão</option>
-          <option value="freios">Freios</option>
-          <option value="eletrica">Elétrica</option>
-          <option value="carroceria">Carroceria</option>
-          <option value="rodas">Rodas e Pneus</option>
-        </select>
-      </div>
-  
-      <!-- Lista de Cards -->
-      <div class="cards-container">
-        <div 
-          v-for="(item, index) in filteredItems" 
-          :key="index" 
-          class="card"
-        >
-          <img :src="item.image" alt="Imagem da peça" class="card-image"/>
-          <div class="card-info">
-            <h3>{{ item.name }}</h3>
-            <p>{{ item.description }}</p>
-            <span class="price">R$ {{ item.price }}</span>
-          </div>
-        </div>
+  <div class="categorias-container">
+    <h1>🔍 Produtos à Venda</h1>
+    <div class="filtros">
+      <select v-model="filtroCategoria">
+        <option value="">Todas as Categorias</option>
+        <option>Motor</option>
+        <option>Suspensão</option>
+        <option>Cambio</option>
+        <option>Freios</option>
+        <option>Elétrica</option>
+        <option>Carroceria</option>
+        <option>Rodas e Pneus</option>
+      </select>
+    </div>
+
+    <div class="produtos">
+      <div v-for="produto in produtosFiltrados" :key="produto.id" class="produto-card">
+        <button class="add-cart-btn" @click="adicionarAoCarrinho(produto)">🛒</button>
+        <img :src="produto.imagem_url" alt="Imagem do produto" class="produto-imagem" />
+        <h3>{{ produto.nome }}</h3>
+        <p>{{ produto.categoria }}</p>
+        <p>R$ {{ produto.preco }}</p>
+        <p>{{ produto.estado }}</p>
+        <p>{{ produto.descricao }}</p>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed } from 'vue';
-  
-  const items = [
-    { name: "Motor V8", description: "Potente para alta performance", price: 1000, category: "motor", image: "/assets/img/peça1.jpg" },
-    { name: "Suspensão Esportiva", description: "Ideal para pista", price: 500, category: "suspensao", image: "/assets/img/peça2.jpg" },
-    { name: "Pastilhas de Freio", description: "Segurança nas curvas", price: 200, category: "freios", image: "/assets/img/peça3.jpg" },
-    { name: "Faróis LED", description: "Melhore a visibilidade", price: 150, category: "eletrica", image: "/assets/img/peça4.jpg" },
-    { name: "Parachoque Traseiro", description: "Design agressivo", price: 800, category: "carroceria", image: "/assets/img/peça5.jpg" },
-    { name: "Pneu Michelin", description: "Alta durabilidade", price: 350, category: "rodas", image: "/assets/img/peça6.jpg" }
-  ];
-  
-  const searchQuery = ref('');
-  const selectedCategory = ref('');
-  
-  const filteredItems = computed(() => {
-    return items.filter(item => {
-      const matchSearch = item.name.toLowerCase().includes(searchQuery.value.toLowerCase());
-      const matchCategory = selectedCategory.value ? item.category === selectedCategory.value : true;
-      return matchSearch && matchCategory;
-    });
-  });
-  </script>
-  
-  <style scoped>
-  .categorias {
-    padding: 50px 20px;
-    background-color: #f4f4f4;
-    color: white;
-    text-align: center;
-    font-family: 'Rajdhani', sans-serif;
+
+    <!-- Modal simples -->
+    <div v-if="mostrarPopup" class="popup-overlay">
+      <div class="popup-content">
+        <p>Produto adicionado ao carrinho!</p>
+        <button @click="continuarComprando">Continuar comprando</button>
+        <button @click="irParaCarrinho">Ir para o Carrinho</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted, watch, computed } from 'vue'
+import { db } from '../firebase'
+import { collection, getDocs } from 'firebase/firestore'
+import { useRoute, useRouter } from 'vue-router'
+
+export default {
+  setup() {
+    const produtos = ref([])
+    const filtroCategoria = ref('')
+    const produtosFiltrados = ref([])
+    const mostrarPopup = ref(false)
+    const route = useRoute()
+    const router = useRouter()
+
+    const carregarProdutos = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'produtos'))
+        produtos.value = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        aplicarFiltro()
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error.message)
+      }
+    }
+
+    const aplicarFiltro = () => {
+      const termo = (route.query.busca || '').toLowerCase().trim()
+      let filtrados = produtos.value
+
+      if (filtroCategoria.value) {
+        filtrados = filtrados.filter(p =>
+          p.categoria?.toLowerCase() === filtroCategoria.value.toLowerCase()
+        )
+      }
+
+      if (termo) {
+        let encontrados = filtrados.filter(p =>
+          p.titulo?.toLowerCase().includes(termo) ||
+          p.descricao?.toLowerCase().includes(termo)
+        )
+
+        if (encontrados.length === 0) {
+          const palavras = termo.split(' ')
+          encontrados = filtrados.filter(p => {
+            return palavras.some(palavra =>
+              p.titulo?.toLowerCase().includes(palavra) ||
+              p.descricao?.toLowerCase().includes(palavra)
+            )
+          })
+        }
+
+        filtrados = encontrados
+      }
+
+      produtosFiltrados.value = filtrados
+    }
+
+    const adicionarAoCarrinho = (produto) => {
+      const carrinho = JSON.parse(localStorage.getItem('carrinho')) || []
+      carrinho.push(produto)
+      localStorage.setItem('carrinho', JSON.stringify(carrinho))
+      mostrarPopup.value = true
+    }
+
+    const continuarComprando = () => {
+      mostrarPopup.value = false
+    }
+
+    const irParaCarrinho = () => {
+      mostrarPopup.value = false
+      router.push('/carrinho')
+    }
+
+    onMounted(carregarProdutos)
+    watch(() => route.query.busca, aplicarFiltro)
+    watch(filtroCategoria, aplicarFiltro)
+
+    return {
+      produtosFiltrados,
+      filtroCategoria,
+      adicionarAoCarrinho,
+      mostrarPopup,
+      continuarComprando,
+      irParaCarrinho
+    }
   }
-  
-  h1 {
-    font-size: 36px;
-    color: #ff6600;
-    margin-bottom: 30px;
+}
+</script>
+
+<style scoped>
+/* Garantir que a rolagem da página e o layout não tenham problemas */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Evitar rolagem horizontal */
+  scroll-behavior: smooth; /* Suaviza a rolagem */
+  height: 100%; /* Garantir que a altura ocupe 100% */
+}
+
+/* Container das categorias */
+.categorias-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Rajdhani', sans-serif;
+  padding-top: 80px;
+  padding-bottom: 100px; /* Espaço adicional para o footer */
+  flex-grow: 1; /* Permitir que o conteúdo ocupe o restante da tela */
+}
+
+/* Título */
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+/* Filtros */
+.filtros {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.filtros select {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Layout dos produtos */
+.produtos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Estilo dos cards de produto */
+.produto-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.produto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.produto-imagem {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Título e descrição no card */
+h3 {
+  font-size: 1.5rem;
+  margin-top: 10px;
+}
+
+p {
+  margin: 5px 0;
+  color: #666;
+}
+
+/* Media queries para dispositivos menores */
+@media (max-width: 768px) {
+  .produtos {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  /* Search and Filter */
-  .search-filter {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
+}
+
+@media (max-width: 480px) {
+  .produtos {
+    grid-template-columns: 1fr;
   }
-  
-  .search-bar {
-    background: #f4f4f4;
-    border: 1px solid #333;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    border-radius: 8px;
-    width: 300px;
-  }
-  
-  .search-bar i {
-    color: #888;
-    margin-right: 10px;
-  }
-  
-  .search-bar input {
-    border: none;
-    background: transparent;
-    color: #333;
-    width: 100%;
-    font-size: 16px;
-    outline: none;
-  }
-  
-  .category-select {
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #f4f4f4;
-    border: 1px solid #333;
-    color: #333;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .category-select option {
-    background-color: #1e1e1e;
-    color: white;
-  }
-  
-  /* Cards */
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 0 20px;
-  }
-  
-  .card {
-    background-color: #1e1e1e;
-    border: 2px solid #ff6600;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 10px rgba(255, 102, 0, 0.2);
-  }
-  
-  .card:hover {
-    transform: scale(1.03);
-  }
-  
-  .card-image {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-  }
-  
-  .card-info {
-    padding: 15px;
-    color: white;
-  }
-  
-  .card-info h3 {
-    margin: 0 0 10px;
-    font-size: 20px;
-    color: #ff6600;
-  }
-  
-  .card-info p {
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-  
-  .price {
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-  }
-  </style>
-  
+}
+
+/* Estilo do footer para manter ele no final da tela */
+footer {
+  position: relative;
+  margin-top: auto; /* Garante que o footer vai para o final */
+}
+
+.add-cart-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff6600;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 20%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 1;
+}
+
+.add-cart-btn:hover {
+  background-color: #e55b00;
+}
+
+.produto-card {
+  position: relative; /* importante para o botão absoluto funcionar */
+}
+
+popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: #ff6600;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup-content button:hover {
+  background-color: #e55b00;
+}
+.popup-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 9999;
+  min-width: 300px;
+  max-width: 90%;
+}
+</style>
