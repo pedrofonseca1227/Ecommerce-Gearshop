@@ -7,7 +7,7 @@ import Login from '../views/Login.vue';
 import Cadastro from '../views/Cadastro.vue';
 import Anunciar from '../views/Anunciar.vue';
 import { auth } from '../firebase';
-import Perfil from '../views/Perfil.vue'; // Corrigido: importação correta do auth
+import Carrinho from '../views/Carrinho.vue'; // Corrigido: importação correta do auth
 
 const routes = [
   { path: '/', component: Home },
@@ -16,9 +16,8 @@ const routes = [
   { path: '/sobre', component: Sobre },
   { path: '/login', component: Login },
   { path: '/cadastro', component: Cadastro },
-  { path: '/anunciar', component: Anunciar, meta: { requiresAuth: true } }, // 🚧 protegida
-  { path: '/perfil', component: Perfil },
-
+  { path: '/anunciar', component: Anunciar, meta: { requiresAuth: true } },
+  { path: '/carrinho',name:'Carrinho', component: () => import('@/views/Carrinho.vue') },
 ];
 
 const router = createRouter({

@@ -6,7 +6,7 @@
         <span :class="{ open: menuOpen }"></span>
         <span :class="{ open: menuOpen }"></span>
       </button>
-      
+
       <ul class="nav-links">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/categoria">Categorias</router-link></li>
@@ -14,38 +14,40 @@
         <li><router-link to="/sobre">Sobre Nós</router-link></li>
         <li><router-link to="/contato">Contato</router-link></li>
       </ul>
-      
+
       <div class="search-container">
         <form class="search-bar" @submit.prevent="pesquisar">
-          <input
-            type="text"
-            v-model="termoBusca"
-            placeholder="Buscar peças..."
-          />
+          <input type="text" v-model="termoBusca" placeholder="Buscar peças..." />
           <button type="submit">Buscar</button>
         </form>
       </div>
 
       <ul class="auth-links">
-        <li><button class="cep-btn" @click="abrirCepModal">Localizar CEP</button></li>
-        <li class="separator">|</li>
+        <template v-if="user">
+          <li>
+            <router-link to="/carrinho" class="cart-link">
+              <i class="fa fa-shopping-cart cart-icon"></i>
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/#" class="account-link">
+              <i class="fa fa-user-circle account-icon"></i>
+            </router-link>
+          </li>
+          <li>
+            <button @click="logout" class="logout-btn">Sair</button>
+          </li>
+        </template>
 
-        <!-- Se o usuário estiver logado -->
-        <li v-if="user">
-          <router-link to="/perfil">
-            <i class="fa fa-user-circle account-icon"></i> <!-- Ícone de conta -->
-          </router-link>
-          <button @click="logout" class="logout-btn">Sair</button> <!-- Botão de logout -->
-        </li>
-
-        <li v-else>
-          <router-link to="/login">Entrar</router-link>
-          <router-link to="/cadastro">Cadastre-se</router-link>
-        </li>
+        <template v-else>
+          <li><router-link to="/login">Entrar</router-link></li>
+          <li><router-link to="/cadastro">Cadastre-se</router-link></li>
+        </template>
       </ul>
     </div>
   </nav>
 </template>
+
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
@@ -57,6 +59,10 @@ import { collection, getDocs } from 'firebase/firestore'
 // Variáveis reativas
 const user = ref(null); // Agora é 'null' inicialmente
 const termoBusca = ref('');
+
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value;
+};
 
 // Função para escutar alterações no estado de autenticação
 const unsubscribe = auth.onAuthStateChanged((loggedUser) => {
@@ -84,10 +90,34 @@ const logout = async () => {
     console.error('Erro ao sair:', error);
   }
 };
+
+const handleScroll = () => {
+  isHidden.value = window.scrollY > 100;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
   
 <style scoped>
-/* navbar */
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  margin: 5px auto;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.hamburger span.open {
+  background-color: #ff6600;
+}
+
 .navbar {
   background-color: #1a1a1a;
   padding: 0;
@@ -300,19 +330,45 @@ const logout = async () => {
 }
 
 .search-bar button:hover {
-  background-color: #e55b00; /* Cor laranja mais escuro */
+  background-color: #e55b00; 
 }
 
 .search-bar input::placeholder {
-  color: #aaa; /* Cor do placeholder */
+  color: #aaa; 
 }
 
 .search-bar:focus-within {
-  box-shadow: 0 0 0 2px #ff6600; /* Destaque quando em foco */
+  box-shadow: 0 0 0 2px #ff6600; 
 }
 
 .search-bar button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #ff6600; /* Destaque no botão */
+  box-shadow: 0 0 0 2px #ff6600; 
+}
+
+.cart-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.cart-icon {
+  font-size: 24px;
+  color: white;
+  transition: color 0.3s ease;
+}
+
+.cart-icon:hover {
+  color: #ff6600;
+}
+
+.account-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.account-icon:hover {
+  color: #ff6600;
 }
 </style>

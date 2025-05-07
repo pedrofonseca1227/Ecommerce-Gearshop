@@ -16,6 +16,7 @@
 
     <div class="produtos">
       <div v-for="produto in produtosFiltrados" :key="produto.id" class="produto-card">
+        <button class="add-cart-btn" @click="adicionarAoCarrinho(produto)">🛒</button>
         <img :src="produto.imagem_url" alt="Imagem do produto" class="produto-imagem" />
         <h3>{{ produto.nome }}</h3>
         <p>{{ produto.categoria }}</p>
@@ -24,80 +25,109 @@
         <p>{{ produto.descricao }}</p>
       </div>
     </div>
+
+    <!-- Modal simples -->
+    <div v-if="mostrarPopup" class="popup-overlay">
+      <div class="popup-content">
+        <p>Produto adicionado ao carrinho!</p>
+        <button @click="continuarComprando">Continuar comprando</button>
+        <button @click="irParaCarrinho">Ir para o Carrinho</button>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from 'vue';
-import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import { useRoute } from 'vue-router';
+<script>
+import { ref, onMounted, watch, computed } from 'vue'
+import { db } from '../firebase'
+import { collection, getDocs } from 'firebase/firestore'
+import { useRoute, useRouter } from 'vue-router'
 
-const route = useRoute();
-const produtos = ref([]);
-const produtosFiltrados = ref([]);
-const filtroCategoria = ref('');
+export default {
+  setup() {
+    const produtos = ref([])
+    const filtroCategoria = ref('')
+    const produtosFiltrados = ref([])
+    const mostrarPopup = ref(false)
+    const route = useRoute()
+    const router = useRouter()
 
-const carregarProdutos = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'produtos'));
-    produtos.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    aplicarFiltro(); // Aplica filtro assim que carrega os produtos
-  } catch (error) {
-    console.error('Erro ao carregar produtos:', error.message);
-  }
-};
-
-const aplicarFiltro = () => {
-  const termo = (route.query.busca || '').toLowerCase().trim();
-
-  if (!termo && !filtroCategoria.value) {
-    produtosFiltrados.value = produtos.value;
-    return;
-  }
-
-  let filtrados = produtos.value;
-
-  if (filtroCategoria.value) {
-    filtrados = filtrados.filter(p =>
-      p.categoria?.toLowerCase() === filtroCategoria.value.toLowerCase()
-    );
-  }
-
-  if (termo) {
-    // 1. Filtra produtos que contenham o termo completo
-    let encontrados = filtrados.filter(p =>
-      p.titulo?.toLowerCase().includes(termo) ||
-      p.descricao?.toLowerCase().includes(termo)
-    );
-
-    // 2. Se não encontrou nada, tenta por palavras-chave
-    if (encontrados.length === 0) {
-      const palavras = termo.split(' ');
-      encontrados = filtrados.filter(p => {
-        return palavras.some(palavra =>
-          p.titulo?.toLowerCase().includes(palavra) ||
-          p.descricao?.toLowerCase().includes(palavra)
-        );
-      });
+    const carregarProdutos = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'produtos'))
+        produtos.value = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        aplicarFiltro()
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error.message)
+      }
     }
 
-    filtrados = encontrados;
+    const aplicarFiltro = () => {
+      const termo = (route.query.busca || '').toLowerCase().trim()
+      let filtrados = produtos.value
+
+      if (filtroCategoria.value) {
+        filtrados = filtrados.filter(p =>
+          p.categoria?.toLowerCase() === filtroCategoria.value.toLowerCase()
+        )
+      }
+
+      if (termo) {
+        let encontrados = filtrados.filter(p =>
+          p.titulo?.toLowerCase().includes(termo) ||
+          p.descricao?.toLowerCase().includes(termo)
+        )
+
+        if (encontrados.length === 0) {
+          const palavras = termo.split(' ')
+          encontrados = filtrados.filter(p => {
+            return palavras.some(palavra =>
+              p.titulo?.toLowerCase().includes(palavra) ||
+              p.descricao?.toLowerCase().includes(palavra)
+            )
+          })
+        }
+
+        filtrados = encontrados
+      }
+
+      produtosFiltrados.value = filtrados
+    }
+
+    const adicionarAoCarrinho = (produto) => {
+      const carrinho = JSON.parse(localStorage.getItem('carrinho')) || []
+      carrinho.push(produto)
+      localStorage.setItem('carrinho', JSON.stringify(carrinho))
+      mostrarPopup.value = true
+    }
+
+    const continuarComprando = () => {
+      mostrarPopup.value = false
+    }
+
+    const irParaCarrinho = () => {
+      mostrarPopup.value = false
+      router.push('/carrinho')
+    }
+
+    onMounted(carregarProdutos)
+    watch(() => route.query.busca, aplicarFiltro)
+    watch(filtroCategoria, aplicarFiltro)
+
+    return {
+      produtosFiltrados,
+      filtroCategoria,
+      adicionarAoCarrinho,
+      mostrarPopup,
+      continuarComprando,
+      irParaCarrinho
+    }
   }
-
-  produtosFiltrados.value = filtrados;
-};
-
-onMounted(carregarProdutos);
-
-// Reaplica o filtro toda vez que o usuário faz nova busca
-watch(() => route.query.busca, aplicarFiltro);
-watch(filtroCategoria, aplicarFiltro);
+}
 </script>
-
 
 <style scoped>
 /* Garantir que a rolagem da página e o layout não tenham problemas */
@@ -202,4 +232,69 @@ footer {
   margin-top: auto; /* Garante que o footer vai para o final */
 }
 
+.add-cart-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff6600;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 20%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 1;
+}
+
+.add-cart-btn:hover {
+  background-color: #e55b00;
+}
+
+.produto-card {
+  position: relative; /* importante para o botão absoluto funcionar */
+}
+
+popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: #ff6600;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup-content button:hover {
+  background-color: #e55b00;
+}
+.popup-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 9999;
+  min-width: 300px;
+  max-width: 90%;
+}
 </style>
