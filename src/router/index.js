@@ -7,7 +7,8 @@ import Login from '../views/Login.vue';
 import Cadastro from '../views/Cadastro.vue';
 import Anunciar from '../views/Anunciar.vue';
 import { auth } from '../firebase';
-import Carrinho from '../views/Carrinho.vue'; // Corrigido: importação correta do auth
+import Carrinho from '../views/Carrinho.vue';
+import MeusProdutos from '../views/MeusProdutos.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/cadastro', component: Cadastro },
   { path: '/anunciar', component: Anunciar, meta: { requiresAuth: true } },
   { path: '/carrinho',name:'Carrinho', component: () => import('@/views/Carrinho.vue') },
+  { path: '/meus-produtos', name:'MeusProdutos', component: MeusProdutos, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

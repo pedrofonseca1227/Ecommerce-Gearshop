@@ -30,7 +30,7 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/#" class="account-link">
+            <router-link to="/meus-produtos" class="account-link">
               <i class="fa fa-user-circle account-icon"></i>
             </router-link>
           </li>
