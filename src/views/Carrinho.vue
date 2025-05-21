@@ -44,7 +44,7 @@
 
       <!-- Pagamento via PIX -->
       <div v-if="metodoSelecionado === 'pix'" class="pix-container">
-        <img src="../assets/img/frame (1).png" alt="QR Code PIX" class="qr-code" />
+        <img src="../assets/img/frame.png" alt="QR Code PIX" class="qr-code" />
         <p>Escaneie o QR Code com seu app de banco para finalizar o pagamento.</p>
         <p class="total">Total: <strong>R$ {{ totalCarrinho }}</strong></p>
         <button @click="finalizarCompra">Confirmar Pagamento PIX</button>
