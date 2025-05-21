@@ -33,7 +33,8 @@
     <section class="destaques">
       <h2>Peças em destaque</h2>
       <div class="cards-container">
-        <div class="card" v-for="produto in produtosBaratos" :key="produto.id">
+        <div class="card" v-for="produto in produtosBaratos" :key="produto.id"
+        @click="verDetalhes(produto.id)">
           <div class="imagem-container">
             <img 
               v-if="produto.imagemBase64" 
@@ -56,6 +57,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { getFirestore, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { app } from '@/firebase';
 
@@ -66,6 +68,7 @@ import banner5 from '@/assets/img/banner5.jpg';
 
 const banners = [banner2, banner3, banner4, banner5];
 const indiceAtual = ref(0);
+const router = useRouter();
 let intervalo = null;
 
 // Carrossel automático
@@ -103,6 +106,9 @@ const buscarProdutosMaisBaratos = async () => {
 onMounted(() => {
   buscarProdutosMaisBaratos();
 });
+const verDetalhes = (produtoId) => {
+  router.push(`/produto/${produtoId}`);
+};
 </script>
 
 <style scoped>

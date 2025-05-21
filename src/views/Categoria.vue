@@ -16,41 +16,26 @@
 
     <div class="produtos">
       <div v-for="produto in produtosFiltrados" :key="produto.id" class="produto-card">
-        <button class="add-cart-btn" @click="adicionarAoCarrinho(produto)">🛒</button>
-        
-        <div class="imagem-container">
-          <img 
-            v-if="produto.imagemBase64" 
-            :src="produto.imagemBase64" 
-            :alt="produto.nome"
-            class="produto-imagem"
-          />
-          <div v-else class="sem-imagem">
-            <span>📷 Sem imagem</span>
+        <div class="card-content" @click="irParaProduto(produto.id)">
+          <div class="imagem-container">
+            <img 
+              v-if="produto.imagemBase64" 
+              :src="produto.imagemBase64" 
+              :alt="produto.nome"
+              class="produto-imagem"
+            />
+            <div v-else class="sem-imagem">
+              <span>📷 Sem imagem</span>
+            </div>
           </div>
-        </div>
-        
-        <div class="produto-info">
-          <h3>{{ produto.nome }}</h3>
-          <p class="categoria">{{ produto.categoria }}</p>
-          <p class="preco">R$ {{ produto.preco.toFixed(2) }}</p>
-          <p class="estado">{{ produto.estado }}</p>
-          <p class="descricao">{{ produto.descricao }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de confirmação -->
-    <div v-if="mostrarPopup" class="popup-overlay">
-      <div class="popup-content">
-        <p>Produto adicionado ao carrinho!</p>
-        <div class="modal-botoes">
-          <button @click="continuarComprando" class="btn-continuar">
-            Continuar comprando
-          </button>
-          <button @click="irParaCarrinho" class="btn-carrinho">
-            Ir para o Carrinho
-          </button>
+          
+          <div class="produto-info">
+            <h3>{{ produto.nome }}</h3>
+            <p class="categoria">{{ produto.categoria }}</p>
+            <p class="preco">R$ {{ produto.preco.toFixed(2) }}</p>
+            <p class="estado">{{ produto.estado }}</p>
+            <p class="descricao">{{ produto.descricao }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -68,7 +53,6 @@ export default {
     const produtos = ref([])
     const filtroCategoria = ref('')
     const produtosFiltrados = ref([])
-    const mostrarPopup = ref(false)
     const route = useRoute()
     const router = useRouter()
 
@@ -111,24 +95,10 @@ export default {
       produtosFiltrados.value = filtrados
     }
 
-    const adicionarAoCarrinho = (produto) => {
-      const produtoParaCarrinho = { ...produto }
-      delete produtoParaCarrinho.imagemBase64 
-      
-      const carrinho = JSON.parse(localStorage.getItem('carrinho')) || []
-      carrinho.push(produtoParaCarrinho)
-      localStorage.setItem('carrinho', JSON.stringify(carrinho))
-      mostrarPopup.value = true
+    const irParaProduto = (produtoId) => {
+      router.push(`/produto/${produtoId}`)
     }
 
-    const continuarComprando = () => {
-      mostrarPopup.value = false
-    }
-
-    const irParaCarrinho = () => {
-      mostrarPopup.value = false
-      router.push('/carrinho')
-    }
 
     onMounted(carregarProdutos)
     watch(() => route.query.busca, aplicarFiltro)
@@ -137,10 +107,7 @@ export default {
     return {
       produtosFiltrados,
       filtroCategoria,
-      adicionarAoCarrinho,
-      mostrarPopup,
-      continuarComprando,
-      irParaCarrinho
+      irParaProduto
     }
   }
 }
@@ -204,6 +171,8 @@ h1 {
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.3s;
+  position: relative;
+  cursor: pointer;
 }
 
 /* Responsividade */
@@ -284,52 +253,6 @@ h1 {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.add-cart-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #ff6600;
-  border: none;
-  color: white;
-  font-size: 1.2rem;
-  padding: 6px 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 1;
-  transition: background-color 0.3s;
-}
-
-.add-cart-btn:hover {
-  background-color: #e55b00;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.popup-content {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-}
-
-.popup-content p {
-  margin-bottom: 20px;
-  font-size: 1.1rem;
 }
 
 .modal-botoes {

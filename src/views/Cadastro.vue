@@ -4,6 +4,8 @@
     <form @submit.prevent="cadastrar">
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Senha" required />
+      <input v-model="username" type="username" placeholder="Nome de usuario" required />
+
       <button type="submit">Cadastrar</button>
       <p class="link">
         Já tem uma conta? <router-link to="/login">Entre aqui</router-link>
@@ -13,29 +15,46 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { auth } from '@/firebase.js'; 
-  import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { auth } from '@/firebase.js';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { doc, setDoc, getFirestore } from 'firebase/firestore';
 
-  const email = ref('');
-  const password = ref('');
-  const router = useRouter();
+const email = ref('');
+const password = ref('');
+const username = ref('');
+const router = useRouter();
+const db = getFirestore();
 
-  const cadastrar = async () => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+const cadastrar = async () => {
+  try {
+    // 1. Cria o usuário no Authentication
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const user = userCredential.user;
 
-      await sendEmailVerification(userCredential.user);
+    // 2. Atualiza o displayName no Authentication
+    await updateProfile(user, {
+      displayName: username.value
+    });
 
-      console.log('Usuário cadastrado:', userCredential.user);
-      alert('Cadastro realizado com sucesso! Verifique seu e-mail antes de fazer login.');
-      router.push('/login');
-    } catch (error) {
-      console.error('Erro ao cadastrar:', error.message);
-      alert('Erro ao cadastrar: ' + error.message);
-    }
-  };
+    // 3. Salva informações adicionais no Firestore
+    await setDoc(doc(db, 'usuarios', user.uid), {
+      username: username.value,
+      email: email.value,
+      criadoEm: new Date()
+    });
+
+    // 4. Envia e-mail de verificação
+    await sendEmailVerification(user);
+
+    alert('Cadastro realizado com sucesso! Verifique seu e-mail.');
+    router.push('/login');
+  } catch (error) {
+    console.error('Erro ao cadastrar:', error);
+    alert('Erro ao cadastrar: ' + error.message);
+  }
+};
 </script>
   
   <style scoped>
