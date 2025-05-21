@@ -30,7 +30,7 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/#" class="account-link">
+            <router-link to="/meus-produtos" class="account-link">
               <i class="fa fa-user-circle account-icon"></i>
             </router-link>
           </li>
@@ -59,6 +59,9 @@ import { collection, getDocs } from 'firebase/firestore'
 // Variáveis reativas
 const user = ref(null); // Agora é 'null' inicialmente
 const termoBusca = ref('');
+const menuOpen = ref(false);
+const isHidden = ref(false);
+
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;

@@ -1,6 +1,5 @@
 <template>
   <div class="home-page">
-    <!-- Banner -->
     <section class="galeria-carrossel">
       <div class="carrossel">
         <div class="carrossel-track" :style="{ transform: `translateX(-${indiceAtual * 100}%)` }">
@@ -8,8 +7,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Boas-vindas -->
     <section class="welcome-section">
       <div class="home-banner">
         <img src="@/assets/img/Logo.png" alt="Logo GearShop" class="home-logo" />
@@ -17,8 +14,6 @@
       <h1>Bem-vindo à GearShop</h1>
       <h3>Acelerando sonhos sobre quatro rodas</h3>
     </section>
-
-    <!-- Faixa de destaques -->
     <section class="info-strip">
       <div class="info-box">
         <i class="bi bi-geo-alt-fill icon"></i>
@@ -38,10 +33,21 @@
     <section class="destaques">
       <h2>Peças em destaque</h2>
       <div class="cards-container">
-        <div class="card" v-for="produto in produtosBaratos" :key="produto.id">
-          <img :src="produto.imagem || 'https://via.placeholder.com/150'" alt="Imagem do produto" />
+        <div class="card" v-for="produto in produtosBaratos" :key="produto.id"
+        @click="verDetalhes(produto.id)">
+          <div class="imagem-container">
+            <img 
+              v-if="produto.imagemBase64" 
+              :src="produto.imagemBase64" 
+              :alt="produto.nome"
+              class="produto-imagem"
+            />
+            <div v-else class="sem-imagem">
+              <span>📷 Sem imagem</span>
+            </div>
+          </div>
           <h3>{{ produto.nome }}</h3>
-          <p>{{ produto.descricao }}</p>
+          <p class="descricao">{{ produto.descricao }}</p>
           <span class="preco">R$ {{ Number(produto.preco).toFixed(2) }}</span>
         </div>
       </div>
@@ -51,6 +57,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { getFirestore, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { app } from '@/firebase';
 
@@ -61,6 +68,7 @@ import banner5 from '@/assets/img/banner5.jpg';
 
 const banners = [banner2, banner3, banner4, banner5];
 const indiceAtual = ref(0);
+const router = useRouter();
 let intervalo = null;
 
 // Carrossel automático
@@ -85,7 +93,10 @@ const buscarProdutosMaisBaratos = async () => {
     const querySnapshot = await getDocs(q);
     produtosBaratos.value = querySnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      nome: doc.data().nome || 'Sem nome',
+      preco: doc.data().preco || 0,
+      descricao: doc.data().descricao || 'Sem descrição',
+      imagemBase64: doc.data().imagemBase64 || null
     }));
   } catch (error) {
     console.error('Erro ao buscar produtos:', error);
@@ -95,6 +106,9 @@ const buscarProdutosMaisBaratos = async () => {
 onMounted(() => {
   buscarProdutosMaisBaratos();
 });
+const verDetalhes = (produtoId) => {
+  router.push(`/produto/${produtoId}`);
+};
 </script>
 
 <style scoped>
@@ -246,6 +260,66 @@ margin-bottom: 10px;
 font-weight: bold;
 color: #ff6600;
 font-size: 1.1rem;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.card {
+  background-color: #f4f4f4;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  width: 250px;
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.imagem-container {
+  height: 150px;
+  width: 100%;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.produto-imagem {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sem-imagem {
+  color: #999;
+  font-size: 1rem;
+}
+
+.descricao {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 10px 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preco {
+  font-weight: bold;
+  color: #ff6600;
+  font-size: 1.1rem;
+  display: block;
 }
 
 </style>
