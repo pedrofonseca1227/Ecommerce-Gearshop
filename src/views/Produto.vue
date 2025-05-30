@@ -273,7 +273,7 @@ onMounted(() => {
   background: #fff;
   padding: 30px;
   border-radius: 16px;
-  border: 2px solid #ff6600; /* borda laranja */
+  border: 2px solid #ff6600;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   animation: slideUp 0.3s ease-out;
   text-align: center;

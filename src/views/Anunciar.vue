@@ -127,7 +127,7 @@ const selecionarImagem = (event) => {
   
   if (!file) return;
 
-  // Validações (tipo e tamanho)
+  //Validações (tipo e tamanho)
   const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
   const maxSize = 1 * 1024 * 1024; // 1MB (reduzido para Base64)
 
@@ -141,7 +141,7 @@ const selecionarImagem = (event) => {
     return;
   }
 
-  // Converter para Base64
+  //Converter para Base64
   const reader = new FileReader();
   reader.onload = (e) => {
     imagemBase64.value = e.target.result;
@@ -176,9 +176,9 @@ const anunciarProduto = async () => {
     loading.value = false;
   }
 };
-// Função para mostrar toast de sucesso (implementar ou usar uma lib como vue-toastification)
+//Função para mostrar toast de sucesso (implementar ou usar uma lib como vue-toastification)
 const showSuccessToast = (message) => {
-  alert(message); // Substituir por implementação real de toast
+  alert(message);
 };
 </script>
 

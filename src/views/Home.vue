@@ -29,7 +29,6 @@
       </div>
     </section>
 
-    <!-- Peças em destaque -->
     <section class="destaques">
       <h2>Peças em destaque</h2>
       <div class="cards-container">
@@ -71,7 +70,7 @@ const indiceAtual = ref(0);
 const router = useRouter();
 let intervalo = null;
 
-// Carrossel automático
+//Carrossel automático
 onMounted(() => {
   intervalo = setInterval(() => {
     indiceAtual.value = (indiceAtual.value + 1) % banners.length;
@@ -82,7 +81,7 @@ onUnmounted(() => {
   clearInterval(intervalo);
 });
 
-// Firestore: buscar 3 produtos mais baratos
+//buscar 3 produtos mais baratos
 const db = getFirestore(app);
 const produtosBaratos = ref([]);
 
@@ -116,7 +115,7 @@ const verDetalhes = (produtoId) => {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f4f4;
   color: #1a1a1a;
-  padding-top: 10px; /* Evita que o conteúdo fique atrás da navbar */
+  padding-top: 10px;
 }
 
 /* Carroussel */
@@ -132,7 +131,7 @@ overflow: hidden;
 .carrossel {
 width: 100%;
 overflow: hidden;
-height: 300px; /* você pode ajustar a altura */
+height: 300px;
 position: relative;
 }
 
@@ -159,7 +158,7 @@ flex-shrink: 0;
 
 .home-banner {
   text-align: center;
-  padding: 0px 100px; /* ajustando o espaço ao redor da logo */
+  padding: 0px 100px;
 }
 .welcome-section {
   text-align: center;
@@ -178,7 +177,6 @@ flex-shrink: 0;
   color: #ff6600;
 }
 
-/* Faixa com ícones */
 .info-strip {
   display: flex;
   justify-content: space-around;
@@ -202,8 +200,6 @@ flex-shrink: 0;
   color: orange;
   margin-bottom: 15px;
 }
-
-/* DEstaques */
 
 .destaques {
 padding: 50px 20px;

@@ -1,8 +1,6 @@
 <template>
   <div class="main-content">
-    <!-- Aqui fica o conteúdo da sua página de Categorias ou qualquer outra -->
     <div class="categorias-container">
-      <!-- Seu conteúdo aqui -->
     </div>
   </div>
   <footer class="footer">

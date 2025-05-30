@@ -52,12 +52,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router';
-import { auth } from '@/firebase'  // Certifique-se de que a importação do Firebase está correta
+import { auth } from '@/firebase'
 import { db } from '@/firebase'
 import { collection, getDocs } from 'firebase/firestore'
 
-// Variáveis reativas
-const user = ref(null); // Agora é 'null' inicialmente
+const user = ref(null);
 const termoBusca = ref('');
 const menuOpen = ref(false);
 const isHidden = ref(false);
@@ -67,28 +66,26 @@ const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
 };
 
-// Função para escutar alterações no estado de autenticação
 const unsubscribe = auth.onAuthStateChanged((loggedUser) => {
-  user.value = loggedUser;  // Atualiza o usuário quando houver login/logout
+  user.value = loggedUser;
 });
 
 onUnmounted(() => {
-  unsubscribe();  // Limpa o listener quando o componente for desmontado
+  unsubscribe();
 });
 
 const router = useRouter(); 
 const pesquisar = () => {
   if (termoBusca.value.trim()) {
     router.push({ name: 'categoria', query: { busca: termoBusca.value.trim() } });
-    termoBusca.value = '';  // Limpa o campo após a pesquisa
+    termoBusca.value = '';
   }
 };
 
-// Função de logout
 const logout = async () => {
   try {
-    await auth.signOut(); // Realiza o logout
-    user.value = null;     // Atualiza o estado do usuário
+    await auth.signOut();
+    user.value = null;
   } catch (error) {
     console.error('Erro ao sair:', error);
   }
@@ -180,8 +177,8 @@ onUnmounted(() => {
 }
 
 .account-icon {
-  font-size: 24px; /* Ajuste o tamanho conforme necessário */
-  color: white;    /* Garante que o ícone seja branco */
+  font-size: 24px; 
+  color: white;   
 }
 
 .logout-btn {
@@ -219,7 +216,6 @@ onUnmounted(() => {
   transition: transform 0.5s ease-in-out;
 }
 
-/* CEP Modal */
 
 .cep-btn {
   background: none;
@@ -303,17 +299,17 @@ onUnmounted(() => {
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: #1a1a1a; /* Fundo preto */
+  background-color: #1a1a1a;
   border-radius: 25px;
   padding: 5px 15px;
-  border: 1px solid #444; /* Borda mais sutil */
+  border: 1px solid #444;
 }
 
 .search-bar input {
   background: transparent;
   border: none;
   outline: none;
-  color: white; /* Texto branco */
+  color: white;
   padding: 8px 12px;
   width: 200px;
   font-size: 14px;
@@ -321,7 +317,7 @@ onUnmounted(() => {
 }
 
 .search-bar button {
-  background-color: #ff6600; /* Cor laranja */
+  background-color: #ff6600;
   border: none;
   color: white;
   padding: 8px 14px;

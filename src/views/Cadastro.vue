@@ -29,23 +29,23 @@ const db = getFirestore();
 
 const cadastrar = async () => {
   try {
-    // 1. Cria o usuário no Authentication
+    //Cria o usuário no Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCredential.user;
 
-    // 2. Atualiza o displayName no Authentication
+    //Atualiza o displayName no Authentication
     await updateProfile(user, {
       displayName: username.value
     });
 
-    // 3. Salva informações adicionais no Firestore
+    //Salva informações adicionais no Firestore
     await setDoc(doc(db, 'usuarios', user.uid), {
       username: username.value,
       email: email.value,
       criadoEm: new Date()
     });
 
-    // 4. Envia e-mail de verificação
+    //Envia e-mail de verificação
     await sendEmailVerification(user);
 
     alert('Cadastro realizado com sucesso! Verifique seu e-mail.');

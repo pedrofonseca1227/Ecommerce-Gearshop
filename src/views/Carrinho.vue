@@ -116,7 +116,7 @@ export default {
 <style scoped>
 .checkout-container {
   display: flex;
-  align-items: flex-start; /* ← Deixa cada coluna com sua própria altura */
+  align-items: flex-start;
   gap: 40px;
   padding: 40px;
   max-width: 1200px;
@@ -130,7 +130,6 @@ export default {
   padding: 30px;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  /* Removido o min-height para evitar conflito visual */
 }
 
 .produtos-lista {
@@ -146,7 +145,7 @@ export default {
   padding: 12px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  min-height: 100px; /* Garante altura mínima estável */
+  min-height: 100px;
 }
 
 .produto-card img {
@@ -164,7 +163,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   min-height: 80px;
-  padding-right: 10px; /* Adiciona um espaço para evitar aperto */
+  padding-right: 10px;
 }
 
 .produto-card h4,

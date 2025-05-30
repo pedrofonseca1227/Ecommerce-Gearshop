@@ -121,20 +121,19 @@ export default {
 html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* Evitar rolagem horizontal */
-  scroll-behavior: smooth; /* Suaviza a rolagem */
-  height: 100%; /* Garantir que a altura ocupe 100% */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  height: 100%;
 }
 
-/* Container das categorias */
 .categorias-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Rajdhani', sans-serif;
   padding-top: 80px;
-  padding-bottom: 100px; /* Espaço adicional para o footer */
-  flex-grow: 1; /* Permitir que o conteúdo ocupe o restante da tela */
+  padding-bottom: 100px;
+  flex-grow: 1;
 }
 
 h1 {
@@ -175,7 +174,6 @@ h1 {
   cursor: pointer;
 }
 
-/* Responsividade */
 @media (max-width: 900px) {
   .produtos {
     grid-template-columns: repeat(2, 1fr);

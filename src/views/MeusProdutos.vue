@@ -57,7 +57,6 @@
       </div>
     </div>
 
-    <!-- Modal de confirmação -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal">
         <h3>Confirmar exclusão</h3>
@@ -97,7 +96,7 @@ const filtroCategoria = ref('');
 const showModal = ref(false);
 const produtoParaExcluir = ref(null);
 
-// Carregar produtos do usuário
+//Carregar produtos do usuário
 const carregarProdutos = async () => {
   try {
     const userId = auth.currentUser?.uid;
@@ -124,7 +123,7 @@ const carregarProdutos = async () => {
   }
 };
 
-// Filtrar produtos por categoria
+//Filtrar produtos por categoria
 const produtosFiltrados = computed(() => {
   if (!filtroCategoria.value) return produtos.value;
   return produtos.value.filter(
@@ -132,18 +131,18 @@ const produtosFiltrados = computed(() => {
   );
 });
 
-// Editar produto
+//Editar produto
 const editarProduto = (id) => {
   router.push(`/editar-produto/${id}`);
 };
 
-// Confirmar exclusão
+//Confirmar exclusão
 const confirmarExclusao = (id) => {
   produtoParaExcluir.value = id;
   showModal.value = true;
 };
 
-// Excluir produto
+//Excluir produto
 const excluirProduto = async () => {
   try {
     await deleteDoc(doc(db, 'produtos', produtoParaExcluir.value));
@@ -350,7 +349,6 @@ h1 {
   background-color: #d32f2f;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -416,7 +414,6 @@ h1 {
   background-color: #d32f2f;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .produtos-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
